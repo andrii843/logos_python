@@ -1,0 +1,11 @@
+local_settings.py
+*.pyc
+*.mo
+media/
+node_modules/
+.DS_Store
+.env/
+.idea/
+myvenv/
+
+db.sqlite3

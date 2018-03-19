@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block main_colomn %}
+	<div class="home row">
+		{% for article in articles %}
+			<div class="col-md-3 ">
+				<h3>{{ article.title }}</h3>
+				<p>{{ article.content|truncatechars:"50" }}</p>
+				<a href="{{ article.get_absolute_url }}">Read more</a>
+			</div>
+		{% endfor %}
+	</div>
+{% endblock main_colomn %}

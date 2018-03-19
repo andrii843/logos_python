@@ -1,0 +1,96 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block title %}Logos blog{% endblock %}</title>
+
+    <link href="{% static "vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <link href="{% static "css/blog-post.css" %}" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">Logos Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/articles/">Articles</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container base-container">
+      <div class="row">
+
+        <!-- Post Content Column -->
+        <div class="col-lg-8">
+          {% block main_colomn %}
+            
+          {% endblock main_colomn %}
+        </div>
+
+        <!-- Sidebar Widgets Column -->
+        <div class="col-md-4">
+          {% block sidebar %}
+              <h3>Latest articles</h3>
+              {% for article in latest_articles %}
+                  <div>
+                    <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+                    <p>{{ article.content|truncatewords:"10" }}</p>
+                    <hr>
+                  </div>
+              {% endfor %}
+
+              <h3>Commented articles</h3>
+              {% for comment in latest_comments %}
+                  <div>
+                    <a href="{{ comment.article.get_absolute_url }}">{{ comment.article.title }}</a>
+                    <p>{{ comment.content|truncatewords:"10" }}</p>
+                    <hr>
+                  </div>
+              {% endfor %}
+          {% endblock sidebar %}
+        </div>
+      </div>
+    </div>
+
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Your Website 2018</p>
+      </div>
+    </footer>
+
+    <script src="{% static "vendor/jquery/jquery.min.js" %}"></script>
+    <script src="{% static "vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+
+  </body>
+
+</html>
