@@ -1,22 +1,26 @@
 from django.shortcuts import render
-
-# from django.http import HttpResponse
-
-from django.http import HttpResponseNotFound
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.http import HttpResponseBadRequest
+from django.http import HttpResponse
 
 from main.models import Article
-from tags.models import Tag
+from main.models import ArticleLike
+from main.forms import ArticleForm
+
 from comments.models import Comment
+from comments.forms import CommentForm
 
-
-def article_view(request, article_id):
+def article_view(request, article_id, comment_form=None):
     article = Article.objects.get(id=article_id)
-    comments = Comment.objects.filter(article=article)
+    comments = Comment.objects.filter(article=article).order_by('-id')[:2]
+    article.liked = article.likes.filter(user=request.user).exists()
+
     context = {
         'article': article,
-        'comments': comments
+        'comments': comments,
+        'add_comment_form': CommentForm(initial={
+            'article_id': article_id,
+        })
     }
     return render(request, 'main/single_article.html', context)
 
@@ -28,24 +32,44 @@ def main_view(request):
     }
     return render(request, 'main/home.html', context)
 
-def article_add(request):
-    if request.method == 'GET':
-        tags = Tag.objects.all()
-        context = {
-            'tags': tags
-        }
-        return render(request, 'main/add.html', context)
-    elif request.user.is_authenticated and request.POST:
-        # return HttpResponse(request)
-        article = Article()
-        article.title = request.POST['title']
-        article.content = request.POST['content']
-        article.author = request.user
-        article.image = request.FILES['image']
-        article.save()
 
-        return redirect(
-            reverse('main:home')
-        )
+def add_article_view(request):
+    if request.method == "GET":
+        form = ArticleForm()
+        context = {
+            'add_article_form': form,
+        }
+        return render(request, 'main/add_article.html', context)
     else:
-        return HttpResponseNotFound()
+        form = ArticleForm(request.POST, request.FILES)
+        if form.is_valid():
+            article = form.save(commit=False)
+            article.author = request.user
+            article.save()
+            form.save_m2m()
+            return redirect(article.get_absolute_url())
+        else:
+            context = {
+                'add_article_form': form,
+            }
+            return render(request, 'main/add_article.html', context)
+
+
+def like_article(request):
+    if request.user.is_authenticated and request.POST and request.is_ajax():
+        print(request)
+        article_id = request.POST['article_id']
+        print(article_id)
+
+        article = Article.objects.get(id=article_id)
+        is_liked = article.likes.filter(user=request.user).exists()
+        if is_liked:
+            return HttpResponseBadRequest()
+
+        new_like = ArticleLike.objects.create(
+            user=request.user,
+        )
+        article.likes.add(new_like)
+        return HttpResponse()
+    else:
+        return HttpResponseBadRequest()

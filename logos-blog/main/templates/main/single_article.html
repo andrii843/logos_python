@@ -20,8 +20,7 @@
   <p>{{ article.created }}</p>
 
   <hr>
-
-  <hr>
+  <img src="{{ article.image.url }}">
 
   <!-- Post Content -->
   <p class="lead">
@@ -30,49 +29,81 @@
 
   <a href="{% url 'main:home' %}">Back to home</a>
   <hr>
+  <div>
+    <h3>Tags:</h3>
+    <ul>
+      {% for tag in article.tags.all %}
+        <li>
+          {{ tag }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <hr>
 
+  <div id="likes" class="likes">
+    <a href="#" data-article-id="{{ article.id }}">
+    <i class="fas fa-heart {% if article.liked %}liked{% endif %}"></i></a>
+    <span class="counter">{{ article.likes.count }}</span>
+  </div>
+
+  <hr>
   <!-- Comments Form -->
   <div class="card my-4">
     <h5 class="card-header">Leave a Comment:</h5>
-    <div class="card-body">
-      {% include "comment.html" with article_id=article.id %}
+    <div class="card-body comment-form">
+      {% include "comments/comment.html" with comment_form=add_comment_form %}
     </div>
   </div>
 
-  <!-- Single Comment -->
-  {% for comment in comments %}
-    <div class="media mb-4">
-      <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-      <div class="media-body">
-        <h5 class="mt-0">{{ comment.author }}</h5>
-        {{ comment.content }}
-      </div>
+  <div class="comments-block">
+    <div id="comments-content">
+      {% include "comments/comments.html" with comments=comments %}
     </div>
-  {% endfor %}
-
-  <!-- Comment with nested comments -->
-  <div class="media mb-4">
-    <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-    <div class="media-body">
-      <h5 class="mt-0">Commenter Name</h5>
-      Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-
-      <div class="media mt-4">
-        <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-        <div class="media-body">
-          <h5 class="mt-0">Commenter Name</h5>
-          Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-        </div>
-      </div>
-
-      <div class="media mt-4">
-        <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
-        <div class="media-body">
-          <h5 class="mt-0">Commenter Name</h5>
-          Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-        </div>
-      </div>
-
+    <div id="comment-more" data-num="1" data-article-id="{{ article.id }}">
+      <button id="comment-btn" class="btn">Show more</button>
     </div>
   </div>
+
 {% endblock main_colomn %}
+
+{% block js %}
+  <script type="text/javascript">
+      $('#likes a').click(function (e) {
+          e.preventDefault()
+          articleID = $(this).data('article-id')
+          _this = this
+          $.ajax({
+              url: "{% url 'main:like-article' %}",
+              method: 'POST',
+              data: "article_id=" + articleID,
+              success: function (response) {
+
+              }
+          })
+      });
+
+      $('#comment-more').click(function (e) {
+          e.preventDefault();
+          num = $(this).data('num');
+          article_id = $(this).data('article-id');
+          data = {
+            'num': num,
+            'article_id': article_id
+          }
+
+          $.ajax({
+              url: "{% url 'comments:get_comments' %}",
+              method: 'GET',
+              data: data,
+              success: function (response) {
+                $('#comment-more').data('num', +$('#comment-more').data('num') + 1)
+                $('#comments-content').append(response.content)
+              },
+              error: function (x, y, z) {
+                console.log(x, y, z);
+              }
+          })
+      })
+  </script>
+{% endblock js %}

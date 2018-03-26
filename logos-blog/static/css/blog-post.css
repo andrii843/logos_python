@@ -8,6 +8,9 @@ body {
   padding-top: 54px;
 }
 
+img {
+	max-width: 100%;
+}
 .base-container {
     margin-top: 20px;
 }
@@ -16,4 +19,24 @@ body {
   body {
     padding-top: 56px;
   }
+}
+
+input {
+	display: block;
+}
+
+label {
+	display: block;
+}
+
+.comment-form input {
+	height: 40px;
+}
+.comment-form button {
+	display: block;
+}
+
+
+.liked {
+	color: red;
 }

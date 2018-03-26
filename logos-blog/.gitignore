@@ -6,6 +6,6 @@ node_modules/
 .DS_Store
 .env/
 .idea/
-myvenv/
+myenv/
 
 db.sqlite3
